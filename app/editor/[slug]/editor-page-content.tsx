@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { TranslationEditor } from "@/components/translation-editor";
 import { ExportPanel } from "@/components/export-panel";
+import { AiTranslatePanel } from "@/components/ai-translate-panel";
 import { TutorialPanel } from "@/components/tutorial/tutorial-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ export function EditorPageContent() {
   const [entries, setEntries] = useState<TranslationEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
 
   const [filename, setFilename] = useState<string | null>(null);
   const isUpload = slug === "upload";
@@ -99,6 +101,11 @@ export function EditorPageContent() {
 
   const handleEntriesChange = useCallback((updated: TranslationEntry[]) => {
     setEntries(updated);
+  }, []);
+
+  const handleAiTranslated = useCallback((updated: TranslationEntry[]) => {
+    setEntries(updated);
+    setEditorKey((current) => current + 1);
   }, []);
 
   if (loading) {
@@ -179,6 +186,7 @@ export function EditorPageContent() {
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <section>
             <TranslationEditor
+              key={editorKey}
               slug={editorSlug}
               locale={editorLocale}
               initialEntries={data.entries}
@@ -188,6 +196,13 @@ export function EditorPageContent() {
           </section>
 
           <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            <AiTranslatePanel
+              slug={editorSlug}
+              locale={editorLocale}
+              entries={entries}
+              onTranslated={handleAiTranslated}
+            />
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Exportar</CardTitle>

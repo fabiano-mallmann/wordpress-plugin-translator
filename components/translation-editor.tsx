@@ -37,7 +37,11 @@ function getDraftKey(slug: string, locale: string) {
   return `wp-translate-draft:${slug}:${locale}`;
 }
 
-function persistDraft(slug: string, locale: string, entries: TranslationEntry[]) {
+export function persistDraft(
+  slug: string,
+  locale: string,
+  entries: TranslationEntry[]
+) {
   localStorage.setItem(getDraftKey(slug, locale), JSON.stringify(entries));
 }
 
@@ -90,11 +94,13 @@ export function TranslationEditor({
   const [filter, setFilter] = useState<FilterMode>("all");
   const onChangeRef = useRef(onChange);
 
-  onChangeRef.current = onChange;
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     setEntries(resolveInitialEntries(slug, locale, initialEntries, createMode));
-  }, [slug, locale, initialEntries, createMode]);
+  }, [slug, locale, createMode]);
 
   useEffect(() => {
     persistDraft(slug, locale, entries);
