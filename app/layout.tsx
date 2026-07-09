@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: "WordPress Translate — Traduza plugins da loja oficial",
   description:
     "Busque traduções de plugins WordPress.org, edite strings e exporte arquivos .po/.mo prontos para instalar.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
