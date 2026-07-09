@@ -162,6 +162,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## Credits
 
-Developed by [@fabs_dev](https://x.com/fabs_dev).
+Developed by [@dev_fabs](https://x.com/dev_fabs).
 
 Maintained as an open community project. Use it, fork it, improve it, and share it.

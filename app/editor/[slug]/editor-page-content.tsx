@@ -18,7 +18,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { TranslationData, TranslationEntry } from "@/types/wordpress";
-import { loadUploadSession } from "@/lib/i18n/upload-session";
+import { loadUploadSession, loadBlankSession } from "@/lib/i18n/upload-session";
+import { getBlankPoFilename } from "@/lib/i18n/create-blank-po";
 
 export function EditorPageContent() {
   const params = useParams<{ slug: string }>();
@@ -33,11 +34,29 @@ export function EditorPageContent() {
 
   const [filename, setFilename] = useState<string | null>(null);
   const isUpload = slug === "upload";
+  const isBlank = slug === "new";
 
   useEffect(() => {
     async function loadTranslations() {
       setLoading(true);
       setError(null);
+
+      if (isBlank) {
+        const session = loadBlankSession();
+        if (!session) {
+          setError(
+            "Nenhuma tradução em andamento. Crie uma nova na página inicial."
+          );
+          setLoading(false);
+          return;
+        }
+
+        setData(session.data);
+        setEntries(session.data.entries);
+        setFilename(getBlankPoFilename(session.data.textDomain, session.data.locale));
+        setLoading(false);
+        return;
+      }
 
       if (isUpload) {
         const session = loadUploadSession();
@@ -76,7 +95,7 @@ export function EditorPageContent() {
     }
 
     loadTranslations();
-  }, [slug, locale, isUpload]);
+  }, [slug, locale, isUpload, isBlank]);
 
   const handleEntriesChange = useCallback((updated: TranslationEntry[]) => {
     setEntries(updated);
@@ -103,7 +122,7 @@ export function EditorPageContent() {
         <main className="mx-auto max-w-2xl flex-1 px-4 py-12 text-center">
           <p className="text-destructive">{error ?? "Erro ao carregar traduções."}</p>
           <Link
-            href={isUpload ? "/" : `/plugin/${slug}`}
+            href={isUpload || isBlank ? "/" : `/plugin/${slug}`}
             className={cn(buttonVariants({ variant: "outline" }), "mt-4 inline-flex")}
           >
             Voltar
@@ -114,18 +133,21 @@ export function EditorPageContent() {
   }
 
   const sourceLabel =
-    data.source === "upload"
-      ? "Arquivo enviado"
-      : data.source === "wordpress-api"
-        ? "Tradução oficial"
-        : data.source === "pot-template"
-          ? "Template (.pot)"
-          : "Arquivo .po do plugin";
+    data.source === "blank"
+      ? "Criado do zero"
+      : data.source === "upload"
+        ? "Arquivo enviado"
+        : data.source === "wordpress-api"
+          ? "Tradução oficial"
+          : data.source === "pot-template"
+            ? "Template (.pot)"
+            : "Arquivo .po do plugin";
 
-  const editorSlug = isUpload ? data.textDomain : slug;
-  const editorLocale = isUpload ? data.locale : locale;
-  const backHref = isUpload ? "/" : `/plugin/${slug}`;
-  const title = isUpload ? (filename ?? data.textDomain) : slug;
+  const editorSlug = isUpload || isBlank ? data.textDomain : slug;
+  const editorLocale = isUpload || isBlank ? data.locale : locale;
+  const backHref = isUpload || isBlank ? "/" : `/plugin/${slug}`;
+  const title =
+    isUpload || isBlank ? (filename ?? data.textDomain) : slug;
 
   return (
     <>
@@ -147,7 +169,7 @@ export function EditorPageContent() {
               <Badge variant="outline">{editorLocale}</Badge>
               <Badge variant="secondary">{sourceLabel}</Badge>
               <Badge variant="outline">{data.entries.length} strings</Badge>
-              {data.textDomain && isUpload && (
+              {data.textDomain && (isUpload || isBlank) && (
                 <Badge variant="outline">{data.textDomain}</Badge>
               )}
             </div>
@@ -161,6 +183,7 @@ export function EditorPageContent() {
               locale={editorLocale}
               initialEntries={data.entries}
               onChange={handleEntriesChange}
+              createMode={isBlank}
             />
           </section>
 

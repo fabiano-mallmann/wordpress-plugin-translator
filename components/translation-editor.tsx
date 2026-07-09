@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -28,10 +30,15 @@ interface TranslationEditorProps {
   locale: string;
   initialEntries: TranslationEntry[];
   onChange: (entries: TranslationEntry[]) => void;
+  createMode?: boolean;
 }
 
 function getDraftKey(slug: string, locale: string) {
   return `wp-translate-draft:${slug}:${locale}`;
+}
+
+function persistDraft(slug: string, locale: string, entries: TranslationEntry[]) {
+  localStorage.setItem(getDraftKey(slug, locale), JSON.stringify(entries));
 }
 
 export function loadDraft(
@@ -50,40 +57,68 @@ export function loadDraft(
   }
 }
 
+function resolveInitialEntries(
+  slug: string,
+  locale: string,
+  initialEntries: TranslationEntry[],
+  createMode: boolean
+): TranslationEntry[] {
+  const draft = loadDraft(slug, locale);
+
+  if (createMode && draft) {
+    return draft;
+  }
+
+  if (!createMode && draft && draft.length === initialEntries.length) {
+    return draft;
+  }
+
+  return initialEntries;
+}
+
 export function TranslationEditor({
   slug,
   locale,
   initialEntries,
   onChange,
+  createMode = false,
 }: TranslationEditorProps) {
-  const [entries, setEntries] = useState<TranslationEntry[]>(initialEntries);
+  const [entries, setEntries] = useState<TranslationEntry[]>(() =>
+    resolveInitialEntries(slug, locale, initialEntries, createMode)
+  );
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const onChangeRef = useRef(onChange);
+
+  onChangeRef.current = onChange;
 
   useEffect(() => {
-    const draft = loadDraft(slug, locale);
-    if (draft && draft.length === initialEntries.length) {
-      setEntries(draft);
-      onChange(draft);
-    } else {
-      setEntries(initialEntries);
-      onChange(initialEntries);
-    }
-  }, [slug, locale, initialEntries, onChange]);
+    setEntries(resolveInitialEntries(slug, locale, initialEntries, createMode));
+  }, [slug, locale, initialEntries, createMode]);
+
+  useEffect(() => {
+    persistDraft(slug, locale, entries);
+    onChangeRef.current(entries);
+  }, [entries, slug, locale]);
 
   const updateEntry = useCallback(
-    (index: number, msgstr: string) => {
-      setEntries((current) => {
-        const next = current.map((entry, i) =>
-          i === index ? { ...entry, msgstr } : entry
-        );
-        localStorage.setItem(getDraftKey(slug, locale), JSON.stringify(next));
-        onChange(next);
-        return next;
-      });
+    (index: number, field: "msgid" | "msgstr", value: string) => {
+      setEntries((current) =>
+        current.map((entry, i) =>
+          i === index ? { ...entry, [field]: value } : entry
+        )
+      );
     },
-    [slug, locale, onChange]
+    []
   );
+
+  const addEntry = useCallback(() => {
+    setEntries((current) => [...current, { msgid: "", msgstr: "" }]);
+  }, []);
+
+  const removeEntry = useCallback((index: number) => {
+    setEntries((current) => current.filter((_, i) => i !== index));
+  }, []);
 
   const filteredEntries = useMemo(() => {
     return entries
@@ -105,11 +140,17 @@ export function TranslationEditor({
       });
   }, [entries, search, filter]);
 
-  const translatedCount = entries.filter((e) => e.msgstr.trim().length > 0).length;
+  const translatedCount = entries.filter(
+    (entry) => entry.msgid.trim() && entry.msgstr.trim().length > 0
+  ).length;
+  const totalCount = entries.filter((entry) => entry.msgid.trim()).length;
 
   return (
     <div className="space-y-4">
-      <TranslationProgress total={entries.length} translated={translatedCount} />
+      <TranslationProgress
+        total={createMode ? totalCount : entries.length}
+        translated={translatedCount}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
@@ -131,49 +172,100 @@ export function TranslationEditor({
             <SelectItem value="translated">Traduzidas</SelectItem>
           </SelectContent>
         </Select>
+        {createMode && (
+          <Button type="button" onClick={addEntry} className="shrink-0">
+            Adicionar string
+          </Button>
+        )}
       </div>
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-1/2">Original</TableHead>
-              <TableHead className="w-1/2">Tradução</TableHead>
+              <TableHead className={createMode ? "w-[45%]" : "w-1/2"}>
+                Original
+              </TableHead>
+              <TableHead className={createMode ? "w-[45%]" : "w-1/2"}>
+                Tradução
+              </TableHead>
+              {createMode && <TableHead className="w-12" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredEntries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2} className="py-8 text-center text-muted-foreground">
-                  Nenhuma string encontrada com os filtros atuais.
+                <TableCell
+                  colSpan={createMode ? 3 : 2}
+                  className="py-8 text-center text-muted-foreground"
+                >
+                  {createMode && entries.length === 0
+                    ? "Nenhuma string ainda. Clique em \"Adicionar string\" para começar."
+                    : "Nenhuma string encontrada com os filtros atuais."}
                 </TableCell>
               </TableRow>
             ) : (
               filteredEntries.map(({ entry, index }) => (
-                <TableRow key={`${index}-${entry.msgid.slice(0, 40)}`}>
+                <TableRow key={index}>
                   <TableCell className="align-top">
                     {entry.msgctxt && (
                       <p className="mb-1 text-xs text-muted-foreground">
                         Contexto: {entry.msgctxt}
                       </p>
                     )}
-                    <p className="whitespace-pre-wrap text-sm">{entry.msgid}</p>
+                    {createMode ? (
+                      <Textarea
+                        value={entry.msgid}
+                        onChange={(event) =>
+                          updateEntry(index, "msgid", event.target.value)
+                        }
+                        rows={2}
+                        className="min-h-[60px] resize-y text-sm"
+                        placeholder="Texto original em inglês..."
+                      />
+                    ) : (
+                      <p className="whitespace-pre-wrap text-sm">{entry.msgid}</p>
+                    )}
                   </TableCell>
                   <TableCell className="align-top">
                     <Textarea
                       value={entry.msgstr}
-                      onChange={(event) => updateEntry(index, event.target.value)}
-                      rows={Math.min(6, Math.max(2, entry.msgid.split("\n").length))}
+                      onChange={(event) =>
+                        updateEntry(index, "msgstr", event.target.value)
+                      }
+                      rows={Math.min(
+                        6,
+                        Math.max(2, (entry.msgid || " ").split("\n").length)
+                      )}
                       className="min-h-[60px] resize-y text-sm"
                       placeholder="Digite a tradução..."
                     />
                   </TableCell>
+                  {createMode && (
+                    <TableCell className="align-top">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Remover string"
+                        onClick={() => removeEntry(index)}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {createMode && entries.length > 0 && (
+        <Button type="button" variant="outline" onClick={addEntry}>
+          Adicionar string
+        </Button>
+      )}
 
       <p className="text-xs text-muted-foreground">
         Rascunho salvo automaticamente no navegador.

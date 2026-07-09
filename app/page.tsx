@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { UrlInput } from "@/components/url-input";
 import { PoUpload } from "@/components/po-upload";
+import { CreatePoForm } from "@/components/create-po-form";
 import { TutorialPanel } from "@/components/tutorial/tutorial-panel";
 import {
   Card,
@@ -14,8 +15,8 @@ import {
 const steps = [
   {
     step: "1",
-    title: "Buscar ou enviar",
-    description: "Use a URL do plugin na loja ou envie um arquivo .po",
+    title: "Buscar, enviar ou criar",
+    description: "URL da loja, upload de .po ou tradução do zero",
   },
   {
     step: "2",
@@ -39,8 +40,8 @@ export default function HomePage() {
             Traduza plugins WordPress em minutos
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Cole a URL de um plugin da loja oficial, envie um arquivo .po existente,
-            edite as traduções e exporte arquivos prontos para instalar no seu site.
+            Cole a URL de um plugin da loja oficial, envie um `.po` existente, crie
+            uma tradução do zero, edite as strings e exporte arquivos prontos para instalar.
           </p>
         </section>
 
@@ -68,6 +69,23 @@ export default function HomePage() {
           </p>
           <div className="mt-6">
             <PoUpload size="large" />
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="relative flex items-center py-2">
+            <div className="grow border-t" />
+            <span className="mx-4 shrink text-sm text-muted-foreground">ou</span>
+            <div className="grow border-t" />
+          </div>
+          <h2 className="mt-4 text-center text-lg font-semibold">
+            Criar tradução do zero
+          </h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Sem arquivo .po? Defina o text domain e o idioma e adicione as strings manualmente.
+          </p>
+          <div className="mt-6">
+            <CreatePoForm size="large" />
           </div>
         </section>
 
@@ -107,12 +125,12 @@ export default function HomePage() {
         <p className="mt-2">
           Developed by{" "}
           <Link
-            href="https://x.com/fabs_dev"
+            href="https://x.com/dev_fabs"
             className="underline hover:text-foreground"
             target="_blank"
             rel="noopener noreferrer"
           >
-            @fabs_dev
+            @dev_fabs
           </Link>
         </p>
       </footer>

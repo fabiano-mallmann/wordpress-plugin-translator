@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateMoBuffer, generatePoContent } from "@/lib/i18n/po-parser";
+import { generateMoBuffer, generatePoContent, filterExportableEntries } from "@/lib/i18n/po-parser";
 import type { ExportRequest } from "@/types/wordpress";
 
 export async function POST(request: Request) {
@@ -14,6 +14,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const exportEntries = filterExportableEntries(entries);
+
+    if (exportEntries.length === 0) {
+      return NextResponse.json(
+        { error: "Adicione ao menos uma string com texto original para exportar." },
+        { status: 400 }
+      );
+    }
+
     const exportHeaders = {
       ...headers,
       Language: locale,
@@ -23,7 +32,7 @@ export async function POST(request: Request) {
     const filename = `${textDomain}-${locale}.${format}`;
 
     if (format === "po") {
-      const content = generatePoContent(entries, exportHeaders);
+      const content = generatePoContent(exportEntries, exportHeaders);
       return new NextResponse(content, {
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
@@ -32,7 +41,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const moBuffer = generateMoBuffer(entries, exportHeaders);
+    const moBuffer = generateMoBuffer(exportEntries, exportHeaders);
     return new NextResponse(new Uint8Array(moBuffer), {
       headers: {
         "Content-Type": "application/octet-stream",

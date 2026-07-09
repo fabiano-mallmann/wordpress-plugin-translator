@@ -28,7 +28,7 @@ export interface TranslationData {
   slug: string;
   locale: string;
   textDomain: string;
-  source: "wordpress-api" | "pot-template" | "plugin-po" | "upload";
+  source: "wordpress-api" | "pot-template" | "plugin-po" | "upload" | "blank";
   entries: TranslationEntry[];
   headers: Record<string, string>;
   filename?: string;

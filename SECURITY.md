@@ -15,7 +15,7 @@ If you discover a security issue — especially related to file uploads, API abu
 
 Instead:
 
-1. Contact the maintainer via [GitHub profile](https://github.com/fabiano-mallmann) or the project owner on X ([@fabs_dev](https://x.com/fabs_dev))
+1. Contact the maintainer via [GitHub profile](https://github.com/fabiano-mallmann) or the project owner on X ([@dev_fabs](https://x.com/dev_fabs))
 2. Include a clear description and steps to reproduce
 3. Allow reasonable time for a fix before public disclosure
 

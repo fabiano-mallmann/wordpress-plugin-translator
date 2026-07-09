@@ -1,6 +1,12 @@
 import * as gettext from "gettext-parser";
 import type { TranslationEntry } from "@/types/wordpress";
 
+export function filterExportableEntries(
+  entries: TranslationEntry[]
+): TranslationEntry[] {
+  return entries.filter((entry) => entry.msgid.trim().length > 0);
+}
+
 export function parsePoContent(content: string): {
   entries: TranslationEntry[];
   headers: Record<string, string>;
