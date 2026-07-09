@@ -1,0 +1,7 @@
+msgctxt "button"
+msgid "Submit"
+msgstr "Enviar"
+
+msgctxt "label"
+msgid "Name"
+msgstr "Nome"
