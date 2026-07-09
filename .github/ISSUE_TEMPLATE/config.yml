@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing guide
+    url: https://github.com/fabiano-mallmann/wordpress-plugin-translator/blob/master/CONTRIBUTING.md
+    about: Read how to set up the project and submit pull requests
+  - name: Live demo
+    url: https://wordpress-plugin-translator.vercel.app
+    about: Try the latest deployed version

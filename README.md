@@ -1,64 +1,167 @@
-# WordPress Translate
+# WordPress Plugin Translator
 
-Ferramenta web para buscar, editar e exportar traduções de plugins da loja oficial [WordPress.org](https://wordpress.org/plugins/).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-## Funcionalidades
+Community-maintained web tool to fetch, edit, and export translations for plugins from the official [WordPress.org](https://wordpress.org/plugins/) directory.
 
-- Cole a URL ou slug de um plugin da loja oficial
-- Envie um arquivo `.po` existente para editar diretamente
-- Busca traduções existentes via API do WordPress.org
-- Fallback para arquivos `.pot` do plugin quando não há tradução publicada
-- Editor visual de strings com filtros e progresso
-- Exportação de arquivos `.po` e `.mo`
-- Tutorial integrado de instalação no WordPress
+**Live demo:** [wordpress-plugin-translator.vercel.app](https://wordpress-plugin-translator.vercel.app)
 
-## Requisitos
+---
+
+## Why this project exists
+
+Translating WordPress plugins often means juggling `.po` / `.mo` files, hunting down strings, and figuring out where to place files on the server. This project aims to make that workflow simpler:
+
+- Pull existing translations from WordPress.org
+- Upload your own `.po` file and edit in the browser
+- Export ready-to-use `.po` and `.mo` files
+- Follow a built-in installation guide
+
+This is a **community project**. Contributions, ideas, bug reports, and improvements are welcome.
+
+---
+
+## Features
+
+- Paste a plugin URL or slug from the official directory
+- Upload an existing `.po` file for direct editing
+- Fetch translations via the WordPress.org API
+- Fallback to plugin `.pot` files when no published translation exists
+- Visual string editor with search, filters, and progress tracking
+- Export `.po` and `.mo` files
+- Built-in WordPress installation tutorial
+
+---
+
+## Quick start
+
+### Requirements
 
 - Node.js 18+
 - npm
 
-## Instalação
+### Run locally
 
 ```bash
+git clone https://github.com/fabiano-mallmann/wordpress-plugin-translator.git
+cd wordpress-plugin-translator
 npm install
 npm run dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
-## Uso
+### Build for production
 
-1. Na página inicial, cole a URL do plugin **ou envie um arquivo `.po`**
-2. Selecione o idioma desejado (padrão: `pt_BR`)
-3. Edite as traduções no editor
-4. Exporte `.po` (para continuar editando) ou `.mo` (para instalar no WordPress)
-5. Siga o tutorial para enviar os arquivos ao servidor
-
-## Estrutura
-
-```
-app/           # Páginas e Route Handlers (API)
-components/    # UI e editor
-lib/           # Cliente WordPress.org, parser PO/MO, extrator ZIP
-types/         # Tipos TypeScript
+```bash
+npm run build
+npm start
 ```
 
-## API interna
+---
 
-| Endpoint | Descrição |
-|----------|-----------|
-| `GET /api/plugin?slug=` | Metadados e idiomas disponíveis |
-| `GET /api/translations?slug=&locale=` | Strings para edição |
-| `POST /api/upload-po` | Processa arquivo `.po` enviado |
-| `POST /api/export` | Gera download `.po` ou `.mo` |
+## Usage
 
-## Stack
+1. On the home page, paste a plugin URL **or upload a `.po` file**
+2. Select the target language (default: `pt_BR`)
+3. Edit translations in the editor
+4. Export `.po` (keep editing) or `.mo` (install in WordPress)
+5. Follow the tutorial to upload files to your server
 
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS + shadcn/ui
-- gettext-parser + jszip
+Example plugin URL:
 
-## Licença
+```
+https://wordpress.org/plugins/contact-form-7/
+```
 
-MIT
+---
+
+## Project structure
+
+```
+app/           # Pages and API Route Handlers
+components/    # UI components and editor
+lib/           # WordPress.org client, PO/MO parser, ZIP utilities
+types/         # Shared TypeScript types
+```
+
+---
+
+## API routes
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/plugin?slug=` | Plugin metadata and available locales |
+| `GET /api/translations?slug=&locale=` | Translation strings for editing |
+| `POST /api/upload-po` | Parse an uploaded `.po` file |
+| `POST /api/export` | Generate a `.po` or `.mo` download |
+
+---
+
+## Tech stack
+
+- [Next.js](https://nextjs.org/) 16 (App Router)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+- [gettext-parser](https://www.npmjs.com/package/gettext-parser) + [jszip](https://www.npmjs.com/package/jszip)
+
+---
+
+## Contributing
+
+We welcome contributions from the community.
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, workflow, and guidelines
+- Pick an [open issue](https://github.com/fabiano-mallmann/wordpress-plugin-translator/issues) or open a new one
+- Follow the [Code of Conduct](CODE_OF_CONDUCT.md)
+
+### Ideas for contributions
+
+- Security hardening for file uploads
+- Support for `.pot` uploads
+- Theme translations (WordPress.org themes API)
+- UI/UX improvements and accessibility
+- i18n for the app interface itself
+- Tests for PO/MO parsing and API routes
+
+---
+
+## Roadmap (community-driven)
+
+These are not commitments — they reflect likely directions based on current scope:
+
+- [ ] Rate limiting and upload validation hardening
+- [ ] Manual `.pot` / `.po` batch upload improvements
+- [ ] WordPress theme support
+- [ ] Optional AI-assisted translation suggestions
+- [ ] User accounts / cloud draft storage
+
+Have another idea? [Open a feature request](https://github.com/fabiano-mallmann/wordpress-plugin-translator/issues/new/choose).
+
+---
+
+## Deploy your own instance
+
+This app runs on [Vercel](https://vercel.com/) with zero config for Next.js:
+
+```bash
+npx vercel deploy --prod
+```
+
+No environment variables are required for the core WordPress.org integration.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+## Credits
+
+Developed by [@fabs_dev](https://x.com/fabs_dev).
+
+Maintained as an open community project. Use it, fork it, improve it, and share it.

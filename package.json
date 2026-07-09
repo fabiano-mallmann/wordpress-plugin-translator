@@ -1,7 +1,17 @@
 {
-  "name": "wordpress-translate",
+  "name": "wordpress-plugin-translator",
   "version": "0.1.0",
-  "private": true,
+  "description": "Community web tool to fetch, edit, and export WordPress plugin translations",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabiano-mallmann/wordpress-plugin-translator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fabiano-mallmann/wordpress-plugin-translator/issues"
+  },
+  "homepage": "https://wordpress-plugin-translator.vercel.app",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
